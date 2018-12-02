@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/PeppyS/api.peppysisay.com/app"
+	"github.com/PeppyS/api.peppysisay.com/api"
 )
 
 func main() {
-	api := app.NewAPI()
-	api.Run(":8080")
+	app := api.New()
+	app.Run(":8080")
 }

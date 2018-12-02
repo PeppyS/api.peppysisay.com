@@ -1,30 +1,16 @@
-package app
+package blog
 
 import (
 	"net/http"
 	"time"
 
-	"github.com/PeppyS/api.peppysisay.com/app/middleware"
-
 	"github.com/gin-gonic/gin"
 )
 
-type API struct {
-	router *gin.Engine
-}
+func SetupAPI(r *gin.Engine) {
+	b := r.Group("/blog")
 
-func NewAPI() *API {
-	r := gin.Default()
-
-	r.Use(middleware.CORSMiddleware())
-
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"success": true,
-		})
-	})
-
-	p := r.Group("/post")
+	p := b.Group("/post")
 
 	p.GET("/:id", func(c *gin.Context) {
 		postID := c.Param("id")
@@ -46,10 +32,4 @@ func NewAPI() *API {
 			},
 		})
 	})
-
-	return &API{r}
-}
-
-func (a *API) Run(port string) {
-	a.router.Run(port)
 }

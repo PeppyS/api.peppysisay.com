@@ -1,10 +1,34 @@
-package middleware
+package api
 
 import (
+	"net/http"
+
+	"github.com/PeppyS/api.peppysisay.com/api/blog"
+
 	"github.com/gin-gonic/gin"
 )
 
-func CORSMiddleware() gin.HandlerFunc {
+type API struct {
+	router *gin.Engine
+}
+
+func New() *API {
+	r := gin.Default()
+
+	r.Use(enableCORS())
+
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+		})
+	})
+
+	blog.SetupAPI(r)
+
+	return &API{r}
+}
+
+func enableCORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -18,4 +42,8 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func (a *API) Run(port string) {
+	a.router.Run(port)
 }
