@@ -7,10 +7,10 @@ import (
 )
 
 func main() {
-	port := "8080"
-	
+	port := ":8080"
+
 	if p := os.Getenv("PORT"); p != "" {
-		port = p
+		port = ":" + p
 	}
 
 	app := api.New()
