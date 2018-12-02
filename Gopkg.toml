@@ -36,5 +36,5 @@
 [metadata.heroku]
 root-package = "github.com/PeppyS/api.peppysisay.com"
 go-version = "go1.11.2"
-install = ["./cmd/...go"]
+install = ["./cmd/..."]
 ensure = "true"
