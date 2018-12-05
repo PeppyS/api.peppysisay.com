@@ -9,7 +9,8 @@ import (
 )
 
 type API struct {
-	router *gin.Engine
+	Router  *gin.Engine
+	BlogAPI *blog.BlogAPI
 }
 
 func New() *API {
@@ -23,9 +24,10 @@ func New() *API {
 		})
 	})
 
-	blog.SetupAPI(r)
+	blogAPI := blog.NewAPI(r)
+	blogAPI.SetupHandlers()
 
-	return &API{r}
+	return &API{r, blogAPI}
 }
 
 func enableCORS() gin.HandlerFunc {
@@ -45,5 +47,5 @@ func enableCORS() gin.HandlerFunc {
 }
 
 func (a *API) Run(port string) {
-	a.router.Run(port)
+	a.Router.Run(port)
 }

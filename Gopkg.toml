@@ -38,3 +38,6 @@ root-package = "api"
 go-version = "go1.11.2"
 install = ["./cmd/..."]
 ensure = "true"
+[[constraint]]
+  name = "cloud.google.com/go"
+  version = "0.34.0"

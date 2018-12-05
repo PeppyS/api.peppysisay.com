@@ -1,35 +1,27 @@
 package blog
 
 import (
-	"net/http"
-	"time"
-
 	"github.com/gin-gonic/gin"
+
+	"github.com/PeppyS/api.peppysisay.com/api/blog/comments"
+	"github.com/PeppyS/api.peppysisay.com/api/blog/posts"
 )
 
-func SetupAPI(r *gin.Engine) {
+type BlogAPI struct {
+	CommentsAPI *comments.CommentsAPI
+	PostsAPI    *posts.PostsAPI
+}
+
+func NewAPI(r *gin.Engine) *BlogAPI {
 	b := r.Group("/blog")
 
-	p := b.Group("/post")
+	postsAPI := posts.NewAPI(b)
+	commentsAPI := comments.NewAPI(b)
 
-	p.GET("/:id", func(c *gin.Context) {
-		postID := c.Param("id")
+	return &BlogAPI{commentsAPI, postsAPI}
+}
 
-		c.JSON(http.StatusOK, gin.H{
-			"success": true,
-			"data": gin.H{
-				"likes_count": 0,
-				"comments": []gin.H{
-					gin.H{
-						"post_id":     postID,
-						"created_at":  time.Now().String(),
-						"first_name":  "Bob",
-						"last_name":   "Smith",
-						"text":        "Great write-up! Keep up the good work.",
-						"likes_count": "0",
-					},
-				},
-			},
-		})
-	})
+func (b *BlogAPI) SetupHandlers() {
+	b.CommentsAPI.SetupHandlers()
+	b.PostsAPI.SetupHandlers()
 }
