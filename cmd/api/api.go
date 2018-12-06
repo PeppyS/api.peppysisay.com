@@ -8,11 +8,16 @@ import (
 
 func main() {
 	port := ":8080"
+	apiVersion := "dev"
 
 	if p := os.Getenv("PORT"); p != "" {
 		port = ":" + p
 	}
 
-	app := api.New()
+	if v := os.Getenv("SOURCE_VERSION"); v != "" {
+		apiVersion = v
+	}
+
+	app := api.New(apiVersion)
 	app.Run(port)
 }

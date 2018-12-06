@@ -13,7 +13,7 @@ type API struct {
 	BlogAPI *blog.BlogAPI
 }
 
-func New() *API {
+func New(version string) *API {
 	r := gin.Default()
 
 	r.Use(enableCORS())
@@ -21,6 +21,7 @@ func New() *API {
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
+			"version": version,
 		})
 	})
 
