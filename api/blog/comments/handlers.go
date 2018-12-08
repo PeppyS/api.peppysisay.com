@@ -4,8 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (a *CommentsAPI) SetupHandlers() {
-	c := a.RouterGroup.Group("/comments")
+type CommentsAPI struct {
+	commentService *CommentService
+}
+
+func NewAPI(cs *CommentService) *CommentsAPI {
+	return &CommentsAPI{cs}
+}
+
+func (a *CommentsAPI) SetupHandlers(rg *gin.RouterGroup) {
+	c := rg.Group("/comments")
 
 	c.POST("/", a.New())
 }

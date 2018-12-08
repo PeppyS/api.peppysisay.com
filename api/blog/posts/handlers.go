@@ -2,36 +2,51 @@ package posts
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-func (a *PostsAPI) SetupHandlers() {
-	c := a.RouterGroup.Group("/posts")
-
-	c.GET("/:id", a.Get())
+type PostsAPI struct {
+	postService *PostService
 }
 
-func (a *PostsAPI) Get() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		postID := c.Param("id")
+func NewAPI(ps *PostService) *PostsAPI {
+	return &PostsAPI{ps}
+}
 
-		c.JSON(http.StatusOK, gin.H{
-			"success": true,
-			"data": gin.H{
-				"likes_count": 0,
-				"comments": []gin.H{
-					gin.H{
-						"post_id":     postID,
-						"created_at":  time.Now().String(),
-						"first_name":  "Bob",
-						"last_name":   "Smith",
-						"text":        "Great write-up! Keep up the good work.",
-						"likes_count": "0",
-					},
-				},
-			},
+func (a *PostsAPI) SetupHandlers(rg *gin.RouterGroup) {
+	c := rg.Group("/posts")
+
+	c.GET("/", a.GetAll())
+	c.GET("/:id", a.GetByID())
+}
+
+func (a *PostsAPI) GetAll() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		posts, err := a.postService.GetAll(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+
+		ctx.JSON(http.StatusOK, map[string]interface{}{
+			"data": posts,
+		})
+	}
+}
+
+func (a *PostsAPI) GetByID() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		postID := ctx.Param("id")
+
+		post, err := a.postService.GetByID(ctx, postID)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+
+		ctx.JSON(http.StatusOK, map[string]interface{}{
+			"data": post,
 		})
 	}
 }

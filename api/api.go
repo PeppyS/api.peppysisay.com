@@ -11,24 +11,26 @@ import (
 type API struct {
 	Router  *gin.Engine
 	BlogAPI *blog.BlogAPI
+	Opts
 }
 
-func New(version string) *API {
-	r := gin.Default()
+type Opts struct {
+	Version string
+}
 
-	r.Use(enableCORS())
+func New(router *gin.Engine, blogAPI *blog.BlogAPI, opts Opts) *API {
+	router.Use(enableCORS())
 
-	r.GET("/", func(c *gin.Context) {
+	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
-			"version": version,
+			"version": opts.Version,
 		})
 	})
 
-	blogAPI := blog.NewAPI(r)
-	blogAPI.SetupHandlers()
+	blogAPI.SetupHandlers(&router.RouterGroup)
 
-	return &API{r, blogAPI}
+	return &API{router, blogAPI, opts}
 }
 
 func enableCORS() gin.HandlerFunc {

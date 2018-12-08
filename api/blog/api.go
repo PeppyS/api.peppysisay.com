@@ -12,16 +12,13 @@ type BlogAPI struct {
 	PostsAPI    *posts.PostsAPI
 }
 
-func NewAPI(r *gin.Engine) *BlogAPI {
-	b := r.Group("/blog")
-
-	postsAPI := posts.NewAPI(b)
-	commentsAPI := comments.NewAPI(b)
-
-	return &BlogAPI{commentsAPI, postsAPI}
+func NewAPI(c *comments.CommentsAPI, p *posts.PostsAPI) *BlogAPI {
+	return &BlogAPI{c, p}
 }
 
-func (b *BlogAPI) SetupHandlers() {
-	b.CommentsAPI.SetupHandlers()
-	b.PostsAPI.SetupHandlers()
+func (b *BlogAPI) SetupHandlers(r *gin.RouterGroup) {
+	bg := r.Group("/blog")
+
+	b.CommentsAPI.SetupHandlers(bg)
+	b.PostsAPI.SetupHandlers(bg)
 }
