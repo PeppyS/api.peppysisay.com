@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -21,6 +22,9 @@ func main() {
 	apiVersion := "dev"
 
 	godotenv.Load()
+	for _, pair := range os.Environ() {
+		fmt.Println(pair)
+	}
 
 	config := api.SetupConfig()
 
