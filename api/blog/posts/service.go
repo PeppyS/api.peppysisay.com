@@ -25,6 +25,9 @@ func NewService(db *firestore.Client, cs *comments.CommentService) *PostService 
 
 func (ps *PostService) GetAll(ctx context.Context) ([]Post, error) {
 	docs, err := ps.db.Collection("posts").Documents(ctx).GetAll()
+	if err != nil {
+		return []Post{Post{}}, err
+	}
 
 	return funk.Map(docs, func(doc *firestore.DocumentSnapshot) Post {
 		bytes, _ := json.Marshal(doc.Data())
@@ -41,6 +44,9 @@ func (ps *PostService) GetAll(ctx context.Context) ([]Post, error) {
 
 func (ps *PostService) GetByID(ctx context.Context, id string) (Post, error) {
 	doc, err := ps.db.Collection("posts").Doc(id).Get(ctx)
+	if err != nil {
+		return Post{}, err
+	}
 
 	bytes, _ := json.Marshal(doc.Data())
 
