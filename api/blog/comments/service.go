@@ -30,24 +30,18 @@ func NewService(db *firestore.Client) *CommentService {
 }
 
 func (c Comment) MarshalJSON() ([]byte, error) {
+	type CommentAlias Comment
+
 	return json.Marshal(struct {
-		ID         string `json:"id"`
-		Post       string `json:"post_id"`
-		Parent     string `json:"parent_id,omitempty"`
-		CreatedAt  string `json:"created_at"`
-		FirstName  string `json:"first_name"`
-		LastName   string `json:"last_name"`
-		LikesCount int    `json:"likes_count"`
-		Text       string `json:"text"`
+		CommentAlias
+		Post      string `json:"post_id"`
+		Parent    string `json:"parent_id,omitempty"`
+		CreatedAt string `json:"created_at"`
 	}{
-		ID:         c.ID,
-		Post:       c.Post.ID,
-		Parent:     c.Parent.ID,
-		CreatedAt:  c.CreatedAt.String(),
-		FirstName:  c.FirstName,
-		LastName:   c.LastName,
-		LikesCount: c.LikesCount,
-		Text:       c.Text,
+		CommentAlias: CommentAlias(c),
+		Post:         c.Post.ID,
+		Parent:       c.Parent.ID,
+		CreatedAt:    c.CreatedAt.String(),
 	})
 }
 
