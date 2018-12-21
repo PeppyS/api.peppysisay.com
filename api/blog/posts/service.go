@@ -48,13 +48,20 @@ func (ps *PostService) GetByID(ctx context.Context, id string) (Post, error) {
 		return Post{}, err
 	}
 
-	bytes, _ := json.Marshal(doc.Data())
+	bytes, err := json.Marshal(doc.Data())
+	if err != nil {
+		return Post{}, err
+	}
 
 	post := Post{ID: doc.Ref.ID}
 	json.Unmarshal(bytes, &post)
 
-	comments, _ := ps.commentService.GetAllByPostID(ctx, post.ID)
+	comments, err := ps.commentService.GetAllByPostID(ctx, post.ID)
+	if err != nil {
+		return Post{}, err
+	}
+
 	post.Comments = comments
 
-	return post, err
+	return post, nil
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -24,7 +25,7 @@ func SetupConfig() Config {
 		GoogleCredentialsType:         os.Getenv("GOOGLE_CREDENTIALS_TYPE"),
 		GoogleProjectID:               os.Getenv("GOOGLE_PROJECT_ID"),
 		GooglePrivateKeyID:            os.Getenv("GOOGLE_PRIVATE_KEY_ID"),
-		GooglePrivateKey:              os.Getenv("GOOGLE_PRIVATE_KEY"),
+		GooglePrivateKey:              strings.Replace(os.Getenv("GOOGLE_PRIVATE_KEY"), `\n`, "\n", -1),
 		GoogleClientEmail:             os.Getenv("GOOGLE_CLIENT_EMAIL"),
 		GoogleClientID:                os.Getenv("GOOGLE_CLIENT_ID"),
 		GoogleAuthURI:                 os.Getenv("GOOGLE_AUTH_URI"),
