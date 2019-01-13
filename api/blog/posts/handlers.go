@@ -58,8 +58,8 @@ func (a *PostsAPI) NewComment() gin.HandlerFunc {
 		postID := ctx.Param("id")
 
 		var request struct {
-			Comment string `json:"comment"`
-			Name    string `json:"name"`
+			Text string `json:"text"`
+			Name string `json:"name"`
 		}
 
 		if err := ctx.ShouldBindJSON(&request); err != nil {
@@ -69,7 +69,7 @@ func (a *PostsAPI) NewComment() gin.HandlerFunc {
 			return
 		}
 
-		commentID, err := a.postService.AddComment(ctx, postID, request.Comment, request.Name)
+		commentID, err := a.postService.AddComment(ctx, postID, request.Text, request.Name)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),

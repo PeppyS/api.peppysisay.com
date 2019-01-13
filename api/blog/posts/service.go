@@ -7,6 +7,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/PeppyS/api.peppysisay.com/api/blog/comments"
+	"github.com/gin-gonic/gin"
 	funk "github.com/thoas/go-funk"
 )
 
@@ -67,12 +68,12 @@ func (ps *PostService) GetByID(ctx context.Context, id string) (Post, error) {
 	return post, nil
 }
 
-func (ps *PostService) AddComment(ctx context.Context, postID string, comment string, name string) (string, error) {
+func (ps *PostService) AddComment(ctx *gin.Context, postID string, text string, name string) (string, error) {
 	if postID == "" {
 		return "", fmt.Errorf("Must provide the post ID")
 	}
 
-	if comment == "" {
+	if text == "" {
 		return "", fmt.Errorf("Must provide a comment")
 	}
 
@@ -85,13 +86,18 @@ func (ps *PostService) AddComment(ctx context.Context, postID string, comment st
 		return "", fmt.Errorf("Invalid post ID given")
 	}
 
-	return ps.commentService.New(ctx, postID, comment, name)
+	return ps.commentService.New(ctx, postID, text, name)
 }
 
-func (ps *PostService) DeleteComment(ctx context.Context, postID string, commentID string) error {
+func (ps *PostService) DeleteComment(ctx *gin.Context, postID string, commentID string) error {
 	comment, err := ps.commentService.GetByID(ctx, commentID)
 	if err != nil {
 		return fmt.Errorf("Invalid comment ID")
+	}
+
+	sessionID := ctx.Request.Header.Get("X-Session-ID")
+	if comment.SessionID != sessionID {
+		return fmt.Errorf("This comment does not belong to you")
 	}
 
 	if comment.Post.ID != postID {

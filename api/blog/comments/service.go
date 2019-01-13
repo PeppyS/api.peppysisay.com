@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"github.com/gin-gonic/gin"
 	funk "github.com/thoas/go-funk"
 )
 
@@ -18,10 +19,10 @@ type Comment struct {
 	Post       firestore.DocumentRef `json:"post_id"`
 	Parent     firestore.DocumentRef `json:"parent_id,omitempty"`
 	CreatedAt  time.Time             `json:"created_at"`
-	FirstName  string                `json:"first_name"`
-	LastName   string                `json:"last_name"`
+	Name       string                `json:"name"`
 	LikesCount int                   `json:"likes_count"`
 	Text       string                `json:"text"`
+	SessionID  string                `json:"session_id"`
 }
 
 func NewService(db *firestore.Client) *CommentService {
@@ -33,11 +34,13 @@ func (c Comment) MarshalJSON() ([]byte, error) {
 
 	return json.Marshal(struct {
 		CommentAlias
+		SessionID string `json:"session_id,omitempty"`
 		Post      string `json:"post_id"`
 		Parent    string `json:"parent_id,omitempty"`
 		CreatedAt string `json:"created_at"`
 	}{
 		CommentAlias: CommentAlias(c),
+		SessionID:    "", // Don't include in response
 		Post:         c.Post.ID,
 		Parent:       c.Parent.ID,
 		CreatedAt:    c.CreatedAt.String(),
@@ -76,15 +79,15 @@ func (cs *CommentService) GetByID(ctx context.Context, id string) (Comment, erro
 	return comment, nil
 }
 
-func (cs *CommentService) New(ctx context.Context, postID string, comment string, name string) (string, error) {
+func (cs *CommentService) New(ctx *gin.Context, postID string, text string, name string) (string, error) {
 	newComment := map[string]interface{}{
 		// TODO re-use the current Comment struct
 		"created_at":  time.Now(),
-		"first_name":  name,
-		"last_name":   name,
+		"name":        name,
 		"likes_count": 0,
 		"post_id":     cs.db.Collection("posts").Doc(postID),
-		"text":        comment,
+		"session_id":  ctx.Request.Header.Get("X-Session-ID"),
+		"text":        text,
 	}
 
 	docRef, _, err := cs.db.Collection("comments").Add(ctx, newComment)
