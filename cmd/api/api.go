@@ -61,10 +61,9 @@ func main() {
 	commentsService := comments.NewService(dbClient)
 	postsService := posts.NewService(dbClient, commentsService)
 
-	commentsAPI := comments.NewAPI(commentsService)
 	postsAPI := posts.NewAPI(postsService)
 
-	blogAPI := blog.NewAPI(commentsAPI, postsAPI)
+	blogAPI := blog.NewAPI(postsAPI)
 
 	router := gin.Default()
 

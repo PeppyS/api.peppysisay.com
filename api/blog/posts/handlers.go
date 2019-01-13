@@ -19,6 +19,8 @@ func (a *PostsAPI) SetupHandlers(rg *gin.RouterGroup) {
 
 	c.GET("/", a.GetAll())
 	c.GET("/:id", a.GetByID())
+	c.POST("/:id/comments", a.NewComment())
+	c.DELETE("/:id/comments/:commentID", a.DeleteComment())
 }
 
 func (a *PostsAPI) GetAll() gin.HandlerFunc {
@@ -48,5 +50,52 @@ func (a *PostsAPI) GetByID() gin.HandlerFunc {
 		ctx.JSON(http.StatusOK, map[string]interface{}{
 			"data": post,
 		})
+	}
+}
+
+func (a *PostsAPI) NewComment() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		postID := ctx.Param("id")
+
+		var request struct {
+			Comment string `json:"comment"`
+			Name    string `json:"name"`
+		}
+
+		if err := ctx.ShouldBindJSON(&request); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid request",
+			})
+			return
+		}
+
+		commentID, err := a.postService.AddComment(ctx, postID, request.Comment, request.Name)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"comment_id": commentID,
+		})
+	}
+}
+
+func (a *PostsAPI) DeleteComment() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		postID := ctx.Param("id")
+		commentID := ctx.Param("commentID")
+
+		err := a.postService.DeleteComment(ctx, postID, commentID)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		ctx.Status(http.StatusNoContent)
 	}
 }

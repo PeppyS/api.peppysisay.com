@@ -3,7 +3,6 @@ package comments
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -52,7 +51,6 @@ func (cs *CommentService) GetAllByPostID(ctx context.Context, postID string) ([]
 
 	return funk.Map(docs, func(doc *firestore.DocumentSnapshot) Comment {
 		bytes, _ := json.Marshal(doc.Data())
-		fmt.Println(string(bytes))
 
 		comment := Comment{ID: doc.Ref.ID}
 		json.Unmarshal(bytes, &comment)
@@ -61,6 +59,44 @@ func (cs *CommentService) GetAllByPostID(ctx context.Context, postID string) ([]
 	}).([]Comment), err
 }
 
-func (cs *CommentService) GetByID(id string) {
+func (cs *CommentService) GetByID(ctx context.Context, id string) (Comment, error) {
+	doc, err := cs.db.Collection("comments").Doc(id).Get(ctx)
+	if err != nil {
+		return Comment{}, err
+	}
 
+	bytes, err := json.Marshal(doc.Data())
+	if err != nil {
+		return Comment{}, err
+	}
+
+	comment := Comment{ID: doc.Ref.ID}
+	json.Unmarshal(bytes, &comment)
+
+	return comment, nil
+}
+
+func (cs *CommentService) New(ctx context.Context, postID string, comment string, name string) (string, error) {
+	newComment := map[string]interface{}{
+		// TODO re-use the current Comment struct
+		"created_at":  time.Now(),
+		"first_name":  name,
+		"last_name":   name,
+		"likes_count": 0,
+		"post_id":     cs.db.Collection("posts").Doc(postID),
+		"text":        comment,
+	}
+
+	docRef, _, err := cs.db.Collection("comments").Add(ctx, newComment)
+	if err != nil {
+		return "", err
+	}
+
+	return docRef.ID, nil
+}
+
+func (cs *CommentService) DeleteByID(ctx context.Context, commentID string) error {
+	_, err := cs.db.Collection("comments").Doc(commentID).Delete(ctx)
+
+	return err
 }

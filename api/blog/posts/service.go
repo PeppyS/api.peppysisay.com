@@ -3,6 +3,7 @@ package posts
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"cloud.google.com/go/firestore"
 	"github.com/PeppyS/api.peppysisay.com/api/blog/comments"
@@ -64,4 +65,38 @@ func (ps *PostService) GetByID(ctx context.Context, id string) (Post, error) {
 	post.Comments = comments
 
 	return post, nil
+}
+
+func (ps *PostService) AddComment(ctx context.Context, postID string, comment string, name string) (string, error) {
+	if postID == "" {
+		return "", fmt.Errorf("Must provide the post ID")
+	}
+
+	if comment == "" {
+		return "", fmt.Errorf("Must provide a comment")
+	}
+
+	if name == "" {
+		return "", fmt.Errorf("Must provide a name")
+	}
+
+	_, err := ps.GetByID(ctx, postID)
+	if err != nil {
+		return "", fmt.Errorf("Invalid post ID given")
+	}
+
+	return ps.commentService.New(ctx, postID, comment, name)
+}
+
+func (ps *PostService) DeleteComment(ctx context.Context, postID string, commentID string) error {
+	comment, err := ps.commentService.GetByID(ctx, commentID)
+	if err != nil {
+		return fmt.Errorf("Invalid comment ID")
+	}
+
+	if comment.Post.ID != postID {
+		return fmt.Errorf("Comment does not belong to post")
+	}
+
+	return ps.commentService.DeleteByID(ctx, commentID)
 }
