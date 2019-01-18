@@ -79,7 +79,7 @@ func (cs *CommentService) GetByID(ctx context.Context, id string) (Comment, erro
 	return comment, nil
 }
 
-func (cs *CommentService) New(ctx *gin.Context, postID string, text string, name string) (string, error) {
+func (cs *CommentService) New(ctx *gin.Context, postID string, text string, name string) (Comment, error) {
 	newComment := map[string]interface{}{
 		// TODO re-use the current Comment struct
 		"created_at":  time.Now(),
@@ -92,10 +92,18 @@ func (cs *CommentService) New(ctx *gin.Context, postID string, text string, name
 
 	docRef, _, err := cs.db.Collection("comments").Add(ctx, newComment)
 	if err != nil {
-		return "", err
+		return Comment{}, err
 	}
 
-	return docRef.ID, nil
+	return Comment{
+		ID:         docRef.ID,
+		Post:       *cs.db.Collection("posts").Doc(postID),
+		CreatedAt:  time.Now(),
+		Name:       name,
+		LikesCount: 0,
+		SessionID:  ctx.Request.Header.Get("X-Session-ID"),
+		Text:       text,
+	}, nil
 }
 
 func (cs *CommentService) DeleteByID(ctx context.Context, commentID string) error {

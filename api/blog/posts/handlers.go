@@ -69,7 +69,7 @@ func (a *PostsAPI) NewComment() gin.HandlerFunc {
 			return
 		}
 
-		commentID, err := a.postService.AddComment(ctx, postID, request.Text, request.Name)
+		comment, err := a.postService.AddComment(ctx, postID, request.Text, request.Name)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
@@ -78,7 +78,7 @@ func (a *PostsAPI) NewComment() gin.HandlerFunc {
 		}
 
 		ctx.JSON(http.StatusOK, gin.H{
-			"comment_id": commentID,
+			"data": comment,
 		})
 	}
 }

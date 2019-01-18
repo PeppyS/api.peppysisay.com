@@ -68,22 +68,22 @@ func (ps *PostService) GetByID(ctx context.Context, id string) (Post, error) {
 	return post, nil
 }
 
-func (ps *PostService) AddComment(ctx *gin.Context, postID string, text string, name string) (string, error) {
+func (ps *PostService) AddComment(ctx *gin.Context, postID string, text string, name string) (comments.Comment, error) {
 	if postID == "" {
-		return "", fmt.Errorf("Must provide the post ID")
+		return comments.Comment{}, fmt.Errorf("Must provide the post ID")
 	}
 
 	if text == "" {
-		return "", fmt.Errorf("Must provide a comment")
+		return comments.Comment{}, fmt.Errorf("Must provide a comment")
 	}
 
 	if name == "" {
-		return "", fmt.Errorf("Must provide a name")
+		return comments.Comment{}, fmt.Errorf("Must provide a name")
 	}
 
 	_, err := ps.GetByID(ctx, postID)
 	if err != nil {
-		return "", fmt.Errorf("Invalid post ID given")
+		return comments.Comment{}, fmt.Errorf("Invalid post ID given")
 	}
 
 	return ps.commentService.New(ctx, postID, text, name)
