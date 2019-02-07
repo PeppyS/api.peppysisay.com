@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 
 	"cloud.google.com/go/firestore"
 	"github.com/PeppyS/api.peppysisay.com/api"
-	"github.com/PeppyS/api.peppysisay.com/api/blog"
-	"github.com/PeppyS/api.peppysisay.com/api/blog/comments"
-	"github.com/PeppyS/api.peppysisay.com/api/blog/posts"
+	"github.com/PeppyS/api.peppysisay.com/api/routes"
+	"github.com/PeppyS/api.peppysisay.com/api/routes/blog"
+	"github.com/PeppyS/api.peppysisay.com/api/routes/blog/comments"
+	"github.com/PeppyS/api.peppysisay.com/api/routes/blog/posts"
+	"github.com/PeppyS/api.peppysisay.com/background"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
@@ -22,9 +23,6 @@ func main() {
 	apiVersion := "dev"
 
 	godotenv.Load()
-	for _, pair := range os.Environ() {
-		fmt.Println(pair)
-	}
 
 	config := api.SetupConfig()
 
@@ -52,6 +50,11 @@ func main() {
 		log.Fatalf("JSON encode credentials: %v", err)
 	}
 
+	// Setup background queue & workers
+	queue := background.NewQueue(100)
+	dispatcher := background.NewDispatcher(queue, 3)
+	dispatcher.Run()
+
 	dbClient, err := firestore.NewClient(context.Background(), "personal-site-staging-a449f", option.WithCredentialsJSON(creds))
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
@@ -64,9 +67,12 @@ func main() {
 	postsAPI := posts.NewAPI(postsService)
 
 	blogAPI := blog.NewAPI(postsAPI)
+	rootAPI := routes.NewAPI(blogAPI)
 
 	router := gin.Default()
 
-	app := api.New(router, blogAPI, api.Opts{Version: apiVersion})
+	queue.QueueMessage("API Starting")
+
+	app := api.New(router, rootAPI, api.Opts{Version: apiVersion})
 	app.Run(port)
 }

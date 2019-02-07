@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"cloud.google.com/go/firestore"
-	"github.com/PeppyS/api.peppysisay.com/api/blog/comments"
+	"github.com/PeppyS/api.peppysisay.com/api/routes/blog/comments"
 	"github.com/gin-gonic/gin"
 	funk "github.com/thoas/go-funk"
 )

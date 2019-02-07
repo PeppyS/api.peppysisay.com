@@ -15,12 +15,10 @@ func NewAPI(ps *PostService) *PostsAPI {
 }
 
 func (a *PostsAPI) SetupHandlers(rg *gin.RouterGroup) {
-	c := rg.Group("/posts")
-
-	c.GET("/", a.GetAll())
-	c.GET("/:id", a.GetByID())
-	c.POST("/:id/comments", a.NewComment())
-	c.DELETE("/:id/comments/:commentID", a.DeleteComment())
+	rg.GET("/", a.GetAll())
+	rg.GET("/:id", a.GetByID())
+	rg.POST("/:id/comments", a.NewComment())
+	rg.DELETE("/:id/comments/:commentID", a.DeleteComment())
 }
 
 func (a *PostsAPI) GetAll() gin.HandlerFunc {
