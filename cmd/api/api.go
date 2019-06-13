@@ -9,10 +9,12 @@ import (
 	"cloud.google.com/go/firestore"
 	"github.com/PeppyS/api.peppysisay.com/api"
 	"github.com/PeppyS/api.peppysisay.com/api/routes"
+	"github.com/PeppyS/api.peppysisay.com/api/routes/activity"
 	"github.com/PeppyS/api.peppysisay.com/api/routes/blog"
-	"github.com/PeppyS/api.peppysisay.com/api/routes/blog/comments"
 	"github.com/PeppyS/api.peppysisay.com/api/routes/blog/posts"
 	"github.com/PeppyS/api.peppysisay.com/background"
+	"github.com/PeppyS/api.peppysisay.com/internal/pkg/service"
+	"github.com/PeppyS/api.peppysisay.com/pkg/github"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
@@ -24,7 +26,7 @@ func main() {
 
 	godotenv.Load()
 
-	config := api.SetupConfig()
+	config := api.SetupConfig() 
 
 	if p := os.Getenv("PORT"); p != "" {
 		port = ":" + p
@@ -60,14 +62,18 @@ func main() {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
+	githubClient := github.NewClient()
+
 	// TODO use lib for DI
-	commentsService := comments.NewService(dbClient)
-	postsService := posts.NewService(dbClient, commentsService)
+	activityService := service.NewActivity(http.DefaultClient)
+	commentsService := service.NewComment(dbClient)
+	postsService := service.NewPost(dbClient, commentsService)
 
 	postsAPI := posts.NewAPI(postsService)
 
 	blogAPI := blog.NewAPI(postsAPI)
-	rootAPI := routes.NewAPI(blogAPI)
+	activityAPI := activity.NewAPI(activityService)
+	rootAPI := routes.NewAPI(blogAPI, activityAPI)
 
 	router := gin.Default()
 

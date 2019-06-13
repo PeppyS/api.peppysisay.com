@@ -3,14 +3,15 @@ package posts
 import (
 	"net/http"
 
+	"github.com/PeppyS/api.peppysisay.com/internal/pkg/service"
 	"github.com/gin-gonic/gin"
 )
 
 type PostsAPI struct {
-	postService *PostService
+	postService *service.PostService
 }
 
-func NewAPI(ps *PostService) *PostsAPI {
+func NewAPI(ps *service.PostService) *PostsAPI {
 	return &PostsAPI{ps}
 }
 

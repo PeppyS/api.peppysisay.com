@@ -1,4 +1,4 @@
-package posts
+package service
 
 import (
 	"context"
@@ -6,22 +6,21 @@ import (
 	"fmt"
 
 	"cloud.google.com/go/firestore"
-	"github.com/PeppyS/api.peppysisay.com/api/routes/blog/comments"
 	"github.com/gin-gonic/gin"
 	funk "github.com/thoas/go-funk"
 )
 
 type PostService struct {
 	db             *firestore.Client
-	commentService *comments.CommentService
+	commentService *CommentService
 }
 
 type Post struct {
-	ID       string             `json:"id"`
-	Comments []comments.Comment `json:"comments"`
+	ID       string    `json:"id"`
+	Comments []Comment `json:"comments"`
 }
 
-func NewService(db *firestore.Client, cs *comments.CommentService) *PostService {
+func NewPost(db *firestore.Client, cs *CommentService) *PostService {
 	return &PostService{db, cs}
 }
 
@@ -68,22 +67,22 @@ func (ps *PostService) GetByID(ctx context.Context, id string) (Post, error) {
 	return post, nil
 }
 
-func (ps *PostService) AddComment(ctx *gin.Context, postID string, text string, name string) (comments.Comment, error) {
+func (ps *PostService) AddComment(ctx *gin.Context, postID string, text string, name string) (Comment, error) {
 	if postID == "" {
-		return comments.Comment{}, fmt.Errorf("Must provide the post ID")
+		return Comment{}, fmt.Errorf("Must provide the post ID")
 	}
 
 	if text == "" {
-		return comments.Comment{}, fmt.Errorf("Must provide a comment")
+		return Comment{}, fmt.Errorf("Must provide a comment")
 	}
 
 	if name == "" {
-		return comments.Comment{}, fmt.Errorf("Must provide a name")
+		return Comment{}, fmt.Errorf("Must provide a name")
 	}
 
 	_, err := ps.GetByID(ctx, postID)
 	if err != nil {
-		return comments.Comment{}, fmt.Errorf("Invalid post ID given")
+		return Comment{}, fmt.Errorf("Invalid post ID given")
 	}
 
 	return ps.commentService.New(ctx, postID, text, name)

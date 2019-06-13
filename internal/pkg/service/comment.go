@@ -1,4 +1,4 @@
-package comments
+package service
 
 import (
 	"context"
@@ -25,7 +25,7 @@ type Comment struct {
 	SessionID  string                `json:"session_id"`
 }
 
-func NewService(db *firestore.Client) *CommentService {
+func NewComment(db *firestore.Client) *CommentService {
 	return &CommentService{db}
 }
 

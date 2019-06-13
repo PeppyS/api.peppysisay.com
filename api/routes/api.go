@@ -3,22 +3,25 @@ package routes
 import (
 	"net/http"
 
+	"github.com/PeppyS/api.peppysisay.com/api/routes/activity"
 	"github.com/PeppyS/api.peppysisay.com/api/routes/blog"
 	"github.com/gin-gonic/gin"
 )
 
 type RootAPI struct {
-	BlogAPI *blog.BlogAPI
+	BlogAPI     *blog.BlogAPI
+	ActivityAPI *activity.ActivityAPI
 }
 
-func NewAPI(blogAPI *blog.BlogAPI) *RootAPI {
-	return &RootAPI{blogAPI}
+func NewAPI(blogAPI *blog.BlogAPI, activityAPI *activity.ActivityAPI) *RootAPI {
+	return &RootAPI{blogAPI, activityAPI}
 }
 
 func (a *RootAPI) SetupHandlers(rg *gin.RouterGroup) {
 	rg.GET("/", a.Get())
 
 	a.BlogAPI.SetupHandlers(rg.Group("/blog"))
+	a.ActivityAPI.SetupHandlers(rg.Group("/activity"))
 }
 
 func (a *RootAPI) Get() gin.HandlerFunc {
