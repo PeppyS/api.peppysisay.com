@@ -27,11 +27,18 @@ func (a *RootAPI) Get() gin.HandlerFunc {
 			"description": "Welcome to Peppy's API 👋🏾",
 			"experience": []gin.H{
 				gin.H{
-					"title":       "Software Engineer",
+					"title":       "Platform Engineer",
+					"company":     "Dave.com",
+					"location":    "Los Angeles, CA",
+					"date_range":  "August 2019 - Present",
+					"description": `Helping milions of people thrive financially - https://dave.com/careers`,
+				},
+				gin.H{
+					"title":       "Senior Software Engineer",
 					"company":     "Mothership",
 					"location":    "Los Angeles, CA",
-					"date_range":  "July 2018 - Present",
-					"description": `Helping bring business shipping to the modern age! Building out freight aggregation technology to connect businesses with nearby trucks and vans with extra space to allow for the fastest shipping at the lowest rates. We're hiring! https://mothership.breezy.hr/`,
+					"date_range":  "July 2018 - July 2019",
+					"description": `Helping bring business shipping to the modern age! Building out freight aggregation technology to connect businesses with nearby trucks and vans with extra space to allow for the fastest shipping at the lowest rates.`,
 				},
 				gin.H{
 					"title":       "Software Engineer",
