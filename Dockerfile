@@ -1,12 +1,12 @@
-FROM golang:1.10 as builder
+FROM golang:1.12.5 as builder
+ENV GO111MODULE=on
 WORKDIR $GOPATH/src/github.com/PeppyS/api.peppysisay.com/
 
-# Install dep
-RUN go get -u github.com/golang/dep/...
-
 # Copy code from host and compile
-COPY Gopkg.toml Gopkg.lock ./
-RUN dep ensure --vendor-only
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
 COPY . ./
 RUN go build -o /bin/api cmd/api/api.go
 
